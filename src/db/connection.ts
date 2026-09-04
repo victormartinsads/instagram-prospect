@@ -58,20 +58,29 @@ async function ensureTablesOnce() {
 
 /** Execute raw SQL directly on the client */
 export async function execSql(sql: string, args?: unknown[]): Promise<void> {
-  const client = getLibsqlClient();
-  if (!_tablesEnsured && !sql.includes("CREATE TABLE")) {
-    await ensureTablesOnce();
+  try {
+    const client = getLibsqlClient();
+    if (!_tablesEnsured && !sql.includes("CREATE TABLE")) {
+      await ensureTablesOnce();
+    }
+    await client.execute({ sql, args: (args ?? []) as (string | number | null | Uint8Array)[] });
+  } catch (err) {
+    console.error("[DB execSql error]:", err);
   }
-  await client.execute({ sql, args: (args ?? []) as (string | number | null | Uint8Array)[] });
 }
 
 /** Execute raw SQL and get result */
 export async function querySql(sql: string, args?: unknown[]) {
-  const client = getLibsqlClient();
-  if (!_tablesEnsured) {
-    await ensureTablesOnce();
+  try {
+    const client = getLibsqlClient();
+    if (!_tablesEnsured) {
+      await ensureTablesOnce();
+    }
+    return await client.execute({ sql, args: (args ?? []) as (string | number | null | Uint8Array)[] });
+  } catch (err) {
+    console.error("[DB querySql error]:", err);
+    return { rows: [], columns: [] };
   }
-  return client.execute({ sql, args: (args ?? []) as (string | number | null | Uint8Array)[] });
 }
 
 export async function closeDb(): Promise<void> {

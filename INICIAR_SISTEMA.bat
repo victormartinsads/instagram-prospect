@@ -25,10 +25,11 @@ start "" "C:\Program Files\Google\Chrome\Application\chrome.exe" --remote-debugg
 
 echo.
 echo [3/3] Iniciando Servidor e Worker do Prospector...
-echo [i] O Painel sera aberto no seu navegador em http://localhost:3000
+echo [i] O Painel sera aberto em 6 segundos em http://localhost:3000 ...
 echo.
-timeout /t 3 > nul
-start http://localhost:3000
+
+REM Agendar abertura do navegador para apos a inicializacao do Next.js
+start /b "" cmd /c "timeout /t 6 > nul && start http://localhost:3000"
 
 call pnpm run dev:all
 
