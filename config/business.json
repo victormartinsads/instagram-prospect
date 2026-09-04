@@ -1,0 +1,66 @@
+{
+  "owner": {
+    "name": "Victor de Barros Martins",
+    "role": "Especialista em Automações e IA"
+  },
+  "company": {
+    "name": "Mart Digital",
+    "website": "",
+    "instagramHandle": "@victormartins.io"
+  },
+  "contact": {
+    "whatsappLink": "https://wa.me/5521971748472",
+    "affiliateGroupLink": ""
+  },
+  "pitch": {
+    "oneLiner": "Eu implemento sistemas de atendimento e vendas com IA (WhatsApp + CRM) que fazem pequenas empresas venderem mais sem precisar contratar mais gente.",
+    "howItWorks": [
+      "Diagnóstico rápido do atendimento e funil atual da empresa",
+      "Implementação do sistema (CRM + agente de IA no WhatsApp + automações conectadas)",
+      "Empresa paga a implementação uma vez e uma mensalidade baixa de manutenção e suporte"
+    ],
+    "revenueModel": "Cobro um valor fechado pela implementação do sistema + uma mensalidade recorrente baixa pela manutenção, suporte e ajustes contínuos."
+  },
+  "claims": {
+    "verified": [
+      "Anos de experiência com tráfego pago (Meta Ads e Google Ads) e tecnologia aplicada a negócios",
+      "O sistema de CRM + agente de IA no WhatsApp já está pronto e disponível pra implementação agora",
+      "Quem desenvolve o sistema é o próprio time técnico, não é revenda de ferramenta de terceiro",
+      "Modelo de implementação + manutenção mensal, sem contrato longo obrigatório"
+    ],
+    "unverified": [
+      "Qualquer percentual de aumento de vendas",
+      "Número de empresas/clientes atendidos",
+      "Cases ou depoimentos específicos de clientes",
+      "Prazo garantido de retorno do investimento",
+      "Comparação direta com concorrentes",
+      "Qualquer menção a ser líder ou mais usado no nicho"
+    ]
+  },
+  "icp": {
+    "segments": [
+      "Clínica odontológica",
+      "Clínica médica",
+      "Clínica de estética"
+    ],
+    "keywords": [
+      "clínica odontológica",
+      "consultório odontológico",
+      "odontologia estética",
+      "dentista",
+      "clínica médica",
+      "centro médico",
+      "policlínica",
+      "consultório particular",
+      "clínica de estética avançada",
+      "centro estético",
+      "estética facial e corporal",
+      "harmonização facial"
+    ],
+    "geography": "TODO BRASIL"
+  },
+  "affiliates": {
+    "topics": []
+  },
+  "marketJargon": "Ticket médio = quanto cada cliente gasta em média por pedido/visita — métrica que todo dono de restaurante/estabelecimento de alimentação acompanha de perto"
+}

@@ -1,0 +1,44 @@
+# Dependencies
+node_modules/
+
+# Environment & secrets
+.env
+.env.local
+.env.production
+
+
+# Chrome automation profile
+.chrome-profile/
+
+# SQLite databases
+*.db
+*.db-wal
+*.db-shm
+
+# Data directories
+data/
+backups/
+screenshots/
+traces/
+
+# Next.js
+.next/
+out/
+
+# Build
+dist/
+dist-worker/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Drizzle
+drizzle/meta/
+
+# Logs
+*.log
