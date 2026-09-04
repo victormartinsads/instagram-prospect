@@ -53,6 +53,14 @@ async function main() {
           case "process_inbound": await executeProcessInbound(payload); break;
           case "follow_up": await executeFollowUp(payload); break;
           case "health_check": await runHealthCheck(); break;
+          case "backup_database": 
+            const { createBackup } = await import("@/lib/backup");
+            await createBackup(); 
+            break;
+          case "cleanup_dead_letter": 
+            const { cleanOldBackups } = await import("@/lib/backup");
+            cleanOldBackups(10); 
+            break;
           default: console.log("Unknown job type:", job.type);
         }
         await db.update(jobs).set({ status: "completed" }).where(eq(jobs.id, job.id));
