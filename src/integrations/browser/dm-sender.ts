@@ -1,17 +1,13 @@
 import { connectBrowser, disconnectBrowser } from './connection';
 import { 
-  navigateToDirectInbox, 
-  dismissDialogs, 
-  openNewMessageDialog, 
-  searchAndSelectUser, 
+  openDirectFromProfile, 
   typeMessage, 
   sendMessage, 
   captureFailureContext 
 } from './instagram-actions';
 import { getDb } from '@/db/connection';
-import { messages, leads } from '@/db/schema';
+import { messages, leads, conversations } from '@/db/schema';
 import { eq } from 'drizzle-orm';
-// @ts-ignore - Assuming these modules exist as requested
 import { canSendDM, recordDMSent } from '@/lib/rate-limiter';
 
 let browserMutex = Promise.resolve();
@@ -42,7 +38,7 @@ export async function sendFirstDM(handle: string, message: string, leadId: strin
   }
 
   return withBrowserMutex(async () => {
-    let page = null;
+    let page: any = null;
     try {
       const browser = await connectBrowser();
       const context = browser.contexts()[0];
@@ -52,18 +48,30 @@ export async function sendFirstDM(handle: string, message: string, leadId: strin
 
       page = await context.newPage();
       
-      // Random delay simulating reading
-      await new Promise(r => setTimeout(r, 2000 + Math.random() * 3000));
+      // Delay simulating human reading profile
+      await new Promise(r => setTimeout(r, 2000 + Math.random() * 2000));
 
-      await navigateToDirectInbox(page);
-      await dismissDialogs(page);
-      await openNewMessageDialog(page);
-      await searchAndSelectUser(page, handle);
+      const opened = await openDirectFromProfile(page, handle);
+      if (!opened) {
+        throw new Error(`Could not find "Enviar mensagem" on profile @${handle}`);
+      }
+
       await typeMessage(page, message);
       await sendMessage(page);
 
-      const conversationId = leadId; // Typically conversation relates to lead directly
+      // Ensure a conversation record exists in the database
+      const existingConv = await db.select().from(conversations).where(eq(conversations.leadId, leadId)).limit(1);
+      let conversationId = existingConv[0]?.id;
+      if (!conversationId) {
+        const insertedConv = await db.insert(conversations).values({
+          leadId,
+          channel: 'browser',
+          status: 'active',
+        }).returning();
+        conversationId = insertedConv[0].id;
+      }
 
+      // Record outbound message
       await db.insert(messages).values({
         conversationId,
         leadId,
@@ -73,23 +81,28 @@ export async function sendFirstDM(handle: string, message: string, leadId: strin
         variantId,
       });
 
+      // Update lead pipeline to contacted and waiting reply
       await db.update(leads)
-        .set({ channelStatus: 'waiting_inbound_reply' })
+        .set({ 
+          pipelineStatus: 'contacted',
+          channelStatus: 'waiting_inbound_reply' 
+        })
         .where(eq(leads.id, leadId));
 
       await recordDMSent();
+      console.log(`[DM-SENDER] First DM successfully sent to @${handle}`);
       
     } catch (error) {
       if (page) {
-        await captureFailureContext(page, leadId);
+        await captureFailureContext(page, leadId).catch(() => {});
       }
-      console.error(`Failed to send DM to ${handle}:`, error);
+      console.error(`[DM-SENDER] Failed to send DM to @${handle}:`, error);
       throw error;
     } finally {
       if (page) {
-        await page.close();
+        await page.close().catch(() => {});
       }
-      await disconnectBrowser();
+      await disconnectBrowser().catch(() => {});
     }
   });
 }

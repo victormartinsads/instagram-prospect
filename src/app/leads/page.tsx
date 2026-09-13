@@ -4,6 +4,8 @@ import KanbanColumn from '../components/ui/KanbanColumn';
 import StatusBadge from '../components/ui/StatusBadge';
 import Link from 'next/link';
 
+import DiscoverButton from './DiscoverButton';
+
 export default async function LeadsPage({ searchParams }: { searchParams: Promise<{ type?: string }> }) {
   const resolvedParams = await searchParams;
   const type = resolvedParams.type || 'client';
@@ -18,11 +20,14 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
   return (
     <div className="flex flex-col h-full">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-gray-800">Leads</h1>
-        <div className="flex gap-4">
-          <Link href="?type=client" className={`px-4 py-2 rounded-md ${type === 'client' ? 'bg-primary text-white' : 'bg-white border'}`}>Clientes</Link>
-          <Link href="?type=affiliate" className={`px-4 py-2 rounded-md ${type === 'affiliate' ? 'bg-primary text-white' : 'bg-white border'}`}>Afiliados</Link>
-          <button className="px-4 py-2 bg-success text-white rounded-md font-medium">Novo Lead</button>
+        <div>
+          <h1 className="text-3xl font-bold text-gray-800">Leads</h1>
+          <p className="text-sm text-gray-500 mt-1">Gerencie os leads descobertos e contatados no Instagram</p>
+        </div>
+        <div className="flex items-center gap-3">
+          <Link href="?type=client" className={`px-4 py-2 rounded-md font-medium text-sm transition ${type === 'client' ? 'bg-primary text-white shadow-sm' : 'bg-white border text-gray-700 hover:bg-gray-50'}`}>Clientes</Link>
+          <Link href="?type=affiliate" className={`px-4 py-2 rounded-md font-medium text-sm transition ${type === 'affiliate' ? 'bg-primary text-white shadow-sm' : 'bg-white border text-gray-700 hover:bg-gray-50'}`}>Afiliados</Link>
+          <DiscoverButton />
         </div>
       </div>
 

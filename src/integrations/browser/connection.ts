@@ -10,29 +10,41 @@ let _browser: Browser | null = null;
 export async function connectBrowser(): Promise<Browser> {
   if (_browser && _browser.isConnected()) return _browser;
 
-  try {
-    const config = getEnvConfig();
-    _browser = await chromium.connectOverCDP(config.CHROME_CDP_URL);
-    return _browser;
-  } catch (error: unknown) {
-    const db = getDb();
-    const reason = error instanceof Error ? error.message : String(error);
-    
-    await db.insert(systemState)
-      .values({
-        key: 'browser_unavailable',
-        value: JSON.stringify({ reason, timestamp: new Date().toISOString() }),
-      })
-      .onConflictDoUpdate({
-        target: systemState.key,
-        set: {
-          value: JSON.stringify({ reason, timestamp: new Date().toISOString() }),
-          updatedAt: sql`(datetime('now'))`,
-        }
-      });
-      
-    throw new BrowserUnavailableError(reason);
+  const config = getEnvConfig();
+  const candidateUrls = [
+    config.CHROME_CDP_URL,
+    'http://[::1]:9222',
+    'http://127.0.0.1:9222',
+    'http://localhost:9222',
+  ].filter(Boolean);
+
+  let lastError: unknown = null;
+  for (const url of candidateUrls) {
+    try {
+      _browser = await chromium.connectOverCDP(url);
+      return _browser;
+    } catch (err) {
+      lastError = err;
+    }
   }
+
+  const db = getDb();
+  const reason = lastError instanceof Error ? lastError.message : String(lastError);
+  
+  await db.insert(systemState)
+    .values({
+      key: 'browser_unavailable',
+      value: JSON.stringify({ reason, timestamp: new Date().toISOString() }),
+    })
+    .onConflictDoUpdate({
+      target: systemState.key,
+      set: {
+        value: JSON.stringify({ reason, timestamp: new Date().toISOString() }),
+        updatedAt: sql`(datetime('now'))`,
+      }
+    });
+    
+  throw new BrowserUnavailableError(reason);
 }
 
 export async function disconnectBrowser(): Promise<void> {

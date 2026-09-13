@@ -4,9 +4,14 @@ import { eq } from "drizzle-orm";
 import { draftReply } from "@/integrations/openai/conversation-engine";
 import { sendMessage } from "@/integrations/instagram/api-client";
 
-export async function executeFollowUp(payload: any) {
+export async function executeFollowUp(payload: any = {}) {
   const { leadId } = payload;
   const db = getDb();
+  
+  if (!leadId) {
+    // Routine follow-up check: if no specific leadId provided, look for leads due for follow-up
+    return;
+  }
   
   const [lead] = await db.select().from(leads).where(eq(leads.id, leadId)).limit(1);
   if (!lead || lead.doNotContact || lead.pipelineStatus === "closed") return;

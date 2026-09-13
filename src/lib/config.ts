@@ -96,6 +96,9 @@ export function getEnvConfig(): EnvConfig {
   if (_envConfig) return _envConfig;
 
   try {
+    if (typeof process.loadEnvFile === 'function') {
+      try { process.loadEnvFile(); } catch {}
+    }
     _envConfig = envConfigSchema.parse(process.env);
     return _envConfig;
   } catch (error) {

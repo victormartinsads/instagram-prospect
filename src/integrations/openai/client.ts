@@ -118,55 +118,60 @@ export async function chat(options: ChatOptions): Promise<ChatResult> {
   const env = getEnvConfig();
 
   if (isGeminiEnabled()) {
-    const client = getGeminiClient();
-    const model = options.model === "fast" ? "gemini-2.5-flash" : "gemini-2.5-pro";
+    try {
+      const client = getGeminiClient();
+      const model = options.model === "fast" ? "gemini-2.5-flash" : "gemini-2.5-pro";
 
-    const response = await client.models.generateContent({
-      model,
-      contents: [
-        { role: "user", parts: [{ text: options.userMessage }] }
-      ],
-      config: {
-        systemInstruction: options.systemPrompt,
-        temperature: options.temperature ?? 0.7,
-        maxOutputTokens: options.maxTokens ?? 500,
-        responseMimeType: options.responseMimeType,
-      }
-    });
+      const response = await client.models.generateContent({
+        model,
+        contents: [
+          { role: "user", parts: [{ text: options.userMessage }] }
+        ],
+        config: {
+          systemInstruction: options.systemPrompt,
+          temperature: options.temperature ?? 0.7,
+          maxOutputTokens: options.maxTokens ?? 500,
+          responseMimeType: options.responseMimeType,
+        }
+      });
 
-    const content = response.text || "";
-    const promptTokens = response.usageMetadata?.promptTokenCount ?? 0;
-    const completionTokens = response.usageMetadata?.candidatesTokenCount ?? 0;
-    const cost = estimateCost(model, promptTokens, completionTokens);
+      const content = response.text || "";
+      const promptTokens = response.usageMetadata?.promptTokenCount ?? 0;
+      const completionTokens = response.usageMetadata?.candidatesTokenCount ?? 0;
+      const cost = estimateCost(model, promptTokens, completionTokens);
 
-    await recordCall(model, promptTokens, completionTokens, options.purpose, options.leadId, options.conversationId);
+      await recordCall(model, promptTokens, completionTokens, options.purpose, options.leadId, options.conversationId);
 
-    return { content, model, promptTokens, completionTokens, estimatedCost: cost };
-  } else {
-    const client = getOpenAIClient();
-    const model = options.model === "fast" ? env.OPENAI_MODEL_FAST : env.OPENAI_MODEL;
-
-    const response = await client.chat.completions.create({
-      model,
-      messages: [
-        { role: "system", content: options.systemPrompt },
-        { role: "user", content: options.userMessage },
-      ],
-      temperature: options.temperature ?? 0.7,
-      max_tokens: options.maxTokens ?? 500,
-    });
-
-    const choice = response.choices[0];
-    const content = choice?.message?.content ?? "";
-    const usage = response.usage;
-    const promptTokens = usage?.prompt_tokens ?? 0;
-    const completionTokens = usage?.completion_tokens ?? 0;
-    const cost = estimateCost(model, promptTokens, completionTokens);
-
-    await recordCall(model, promptTokens, completionTokens, options.purpose, options.leadId, options.conversationId);
-
-    return { content, model, promptTokens, completionTokens, estimatedCost: cost };
+      return { content, model, promptTokens, completionTokens, estimatedCost: cost };
+    } catch (geminiError) {
+      console.warn("[AI] Gemini failed or key invalid, falling back to OpenAI:", (geminiError as Error).message);
+    }
   }
+
+  // OpenAI Provider
+  const client = getOpenAIClient();
+  const model = options.model === "fast" ? env.OPENAI_MODEL_FAST : env.OPENAI_MODEL;
+
+  const response = await client.chat.completions.create({
+    model,
+    messages: [
+      { role: "system", content: options.systemPrompt },
+      { role: "user", content: options.userMessage },
+    ],
+    temperature: options.temperature ?? 0.7,
+    max_tokens: options.maxTokens ?? 500,
+  });
+
+  const choice = response.choices[0];
+  const content = choice?.message?.content ?? "";
+  const usage = response.usage;
+  const promptTokens = usage?.prompt_tokens ?? 0;
+  const completionTokens = usage?.completion_tokens ?? 0;
+  const cost = estimateCost(model, promptTokens, completionTokens);
+
+  await recordCall(model, promptTokens, completionTokens, options.purpose, options.leadId, options.conversationId);
+
+  return { content, model, promptTokens, completionTokens, estimatedCost: cost };
 }
 
 // ── Structured Output (JSON) ────────────────────────────────────────────────

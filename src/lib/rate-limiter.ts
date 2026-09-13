@@ -70,7 +70,7 @@ export async function getDailyStats(): Promise<{ sent: number; limit: number; wa
     await setSystemState("warmup_start_date", warmupStartStr);
   }
   
-  const startMs = new Date(`${warmupStartStr}T00:00:00Z`).getTime();
+  const startMs = new Date(warmupStartStr.includes("T") ? warmupStartStr : `${warmupStartStr}T00:00:00Z`).getTime();
   const todayMs = new Date(`${todayStr}T00:00:00Z`).getTime();
   const daysSinceStart = Math.max(0, Math.floor((todayMs - startMs) / (1000 * 60 * 60 * 24)));
   
