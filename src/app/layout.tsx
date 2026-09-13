@@ -9,7 +9,7 @@ const inter = Inter({ subsets: ['latin'] });
 export const dynamic = 'force-dynamic';
 
 export const metadata = {
-  title: 'Mart Digital — Prospecção',
+  title: 'Orbita IO — Prospecção',
   description: 'Sistema de prospecção do Instagram',
 };
 
@@ -27,7 +27,7 @@ export default async function RootLayout({
         <aside className="w-64 bg-white border-r flex flex-col justify-between h-full">
           <div>
             <div className="p-6 font-bold text-xl text-primary-dark border-b">
-              Mart Digital
+              Orbita IO
             </div>
             <nav className="p-4 space-y-2">
               <Link href="/" className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 text-gray-700 hover:text-primary">

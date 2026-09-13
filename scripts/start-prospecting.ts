@@ -2,7 +2,7 @@ import { querySql, execSql } from "../src/db/connection";
 import { runDiscoveryCycle } from "../src/features/campaigns/manager";
 
 async function main() {
-  console.log("=== INICIANDO CICLO DE PROSPECÇÃO MART DIGITAL ===");
+  console.log("=== INICIANDO CICLO DE PROSPECÇÃO ORBITA IO ===");
   
   // Limpar jobs falhados antigos causados por falta de chave
   await execSql("DELETE FROM jobs WHERE status = 'failed'");

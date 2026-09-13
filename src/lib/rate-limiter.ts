@@ -87,8 +87,18 @@ export async function canSendDM(): Promise<{ allowed: boolean; reason?: string; 
     return { allowed: false, reason: "System is paused" };
   }
   
+  const env = getEnvConfig();
+  const dayFormatter = new Intl.DateTimeFormat("en-US", {
+    timeZone: env.OPERATING_TIMEZONE,
+    weekday: "short",
+  });
+  const weekday = dayFormatter.format(new Date());
+  if (weekday === "Sat" || weekday === "Sun") {
+    return { allowed: false, reason: "Fim de semana (envios pausados até segunda-feira às 09:00)" };
+  }
+
   if (!isWithinOperatingHours()) {
-    return { allowed: false, reason: "Outside of operating hours" };
+    return { allowed: false, reason: "Fora do horário comercial (09:00 às 20:00)" };
   }
   
   const stats = await getDailyStats();

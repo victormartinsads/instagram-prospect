@@ -26,21 +26,26 @@ export async function executeDiscoverProfiles(payload: any) {
     await page.goto("https://www.instagram.com/", { waitUntil: "domcontentloaded" });
     await page.waitForTimeout(3000);
 
-    // 2. Abrir o painel de Pesquisa lateral do Instagram
-    const searchNav = page.locator('a[href="#"]:has-text("Pesquisa"), a[href="#"]:has-text("Search"), svg[aria-label="Pesquisa"], svg[aria-label="Search"]').first();
-    if (await searchNav.count() > 0) {
-      await searchNav.click().catch(() => {});
-      await page.waitForTimeout(2000);
-    }
-
-    // 3. Localizar a barra de pesquisa
+    // 2. Verificar se o input de pesquisa já está aberto
     const searchInput = page.locator('input[placeholder*="Pesquisa"], input[placeholder*="Search"], input[aria-label*="pesquisa" i], input[aria-label*="search" i]').first();
+    let isInputVisible = await searchInput.isVisible().catch(() => false);
+
+    if (!isInputVisible) {
+      const searchNav = page.locator('a[href="#"]:has-text("Pesquisa"), a[href="#"]:has-text("Search"), svg[aria-label="Pesquisa"], svg[aria-label="Search"]').first();
+      if (await searchNav.count() > 0) {
+        await searchNav.click().catch(() => {});
+        await page.waitForTimeout(2000);
+      }
+      isInputVisible = await searchInput.isVisible({ timeout: 4000 }).catch(() => false);
+    }
     
     let candidateHandles: string[] = [];
 
-    if (await searchInput.isVisible({ timeout: 5000 }).catch(() => false)) {
+    if (isInputVisible) {
+      await searchInput.fill("");
+      await page.waitForTimeout(300);
       await searchInput.fill(keyword);
-      await page.waitForTimeout(3500);
+      await page.waitForTimeout(4000);
 
       // 4. Extrair os perfis sugeridos nos resultados da pesquisa
       candidateHandles = await page.evaluate(() => {
@@ -64,8 +69,8 @@ export async function executeDiscoverProfiles(payload: any) {
 
     console.log(`[WORKER] Encontrados ${candidateHandles.length} perfis candidatos para "${keyword}":`, candidateHandles);
 
-    // Limitar a até 5 perfis por ciclo de palavra-chave para manter aquecimento suave
-    const selectedHandles = candidateHandles.slice(0, 5);
+    // Coleta até 8 perfis por ciclo de palavra-chave
+    const selectedHandles = candidateHandles.slice(0, 8);
 
     for (const handle of selectedHandles) {
       // Ignorar se já existir no banco
