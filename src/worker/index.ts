@@ -1,6 +1,6 @@
 import { initDb, getDb } from "@/db/connection";
 import { jobs, systemState } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { registerScheduledJobs } from "./scheduler";
 import { executeDiscoverProfiles } from "./jobs/discover-profiles";
 import { executeQualifyLead } from "./jobs/qualify-lead";
@@ -39,6 +39,19 @@ async function main() {
     
     // Check circuit breakers...
     
+    // Auto-abastecer fila de abordagem com leads qualificados se permitido
+    const [existingDmJob] = await db.select().from(jobs).where(and(eq(jobs.type, "send_first_dm"), eq(jobs.status, "pending"))).limit(1);
+    if (!existingDmJob) {
+      try {
+        const { canSendDM } = await import("@/lib/rate-limiter");
+        const canSend = await canSendDM();
+        if (canSend.allowed) {
+          const { runContactCycle } = await import("@/features/campaigns/manager");
+          await runContactCycle(5);
+        }
+      } catch {}
+    }
+    
     const [job] = await db.select().from(jobs).where(eq(jobs.status, "pending")).limit(1);
     
     if (job) {
@@ -65,7 +78,13 @@ async function main() {
         }
         await db.update(jobs).set({ status: "completed" }).where(eq(jobs.id, job.id));
       } catch (err: any) {
-        await db.update(jobs).set({ status: "failed", error: err.message }).where(eq(jobs.id, job.id));
+        if (err.message && (err.message.includes("Rate limit") || err.message.includes("Fim de semana") || err.message.includes("horário comercial"))) {
+          console.log(`[WORKER] Envio pausado: ${err.message}. Aguardando janela operacional...`);
+          await db.update(jobs).set({ status: "pending", error: null }).where(eq(jobs.id, job.id));
+          await new Promise(r => setTimeout(r, 30000));
+        } else {
+          await db.update(jobs).set({ status: "failed", error: err.message }).where(eq(jobs.id, job.id));
+        }
       }
     }
     

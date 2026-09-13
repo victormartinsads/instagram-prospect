@@ -1,6 +1,6 @@
 import { getDb } from "@/db/connection";
 import { leads, jobs } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, and, or } from "drizzle-orm";
 import { getBusinessConfig } from "@/lib/config";
 
 export async function runDiscoveryCycle() {
@@ -15,15 +15,47 @@ export async function runDiscoveryCycle() {
   }
 }
 
-export async function runContactCycle() {
+export async function runContactCycle(limit = 10) {
   const db = getDb();
-  const qualifiedLeads = await db.select().from(leads).where(eq(leads.pipelineStatus, "qualified")).limit(10);
+  const qualifiedLeads = await db
+    .select()
+    .from(leads)
+    .where(
+      and(
+        eq(leads.pipelineStatus, "qualified"),
+        eq(leads.doNotContact, false)
+      )
+    )
+    .limit(limit);
   
   for (const lead of qualifiedLeads) {
-    await db.insert(jobs).values({
-      type: "send_first_dm",
-      payload: JSON.stringify({ leadId: lead.id })
+    // Verificar se já existe job pendente para esse lead
+    const existingJobs = await db
+      .select()
+      .from(jobs)
+      .where(
+        and(
+          eq(jobs.type, "send_first_dm"),
+          or(eq(jobs.status, "pending"), eq(jobs.status, "running"))
+        )
+      );
+    
+    const alreadyQueued = existingJobs.some(j => {
+      try {
+        const p = JSON.parse(j.payload as string);
+        return p.leadId === lead.id;
+      } catch {
+        return false;
+      }
     });
+
+    if (!alreadyQueued) {
+      await db.insert(jobs).values({
+        type: "send_first_dm",
+        payload: JSON.stringify({ leadId: lead.id })
+      });
+      console.log(`[CAMPAIGN] Lead @${lead.instagramHandle} enfileirado para abordagem`);
+    }
   }
 }
 
