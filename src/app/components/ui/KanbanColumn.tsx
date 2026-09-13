@@ -2,10 +2,12 @@ import React from 'react';
 
 export default function KanbanColumn({ label, count, children }: { label: string, count: number, children: React.ReactNode }) {
   return (
-    <div className="bg-gray-50 flex-none w-80 rounded-xl p-4 border border-gray-200">
-      <div className="flex justify-between items-center mb-4">
-        <h3 className="font-semibold text-gray-700">{label}</h3>
-        <span className="bg-gray-200 text-gray-700 text-xs py-1 px-2 rounded-full">{count}</span>
+    <div className="bg-[#121214]/70 backdrop-blur-sm flex-none w-80 rounded-xl p-4 border border-white/[0.08] flex flex-col">
+      <div className="flex justify-between items-center mb-3 pb-2 border-b border-white/[0.04]">
+        <h3 className="font-semibold text-zinc-200 text-sm tracking-wide">{label}</h3>
+        <span className="bg-[#18181B] text-zinc-400 border border-white/[0.08] text-xs font-mono py-0.5 px-2 rounded-full font-medium">
+          {count}
+        </span>
       </div>
       <div className="flex flex-col min-h-[500px]">
         {children}

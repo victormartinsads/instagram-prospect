@@ -21,12 +21,32 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
     <div className="flex flex-col h-full">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-3xl font-bold text-gray-800">Leads</h1>
-          <p className="text-sm text-gray-500 mt-1">Gerencie os leads descobertos e contatados no Instagram</p>
+          <h1 className="text-3xl font-bold text-white tracking-tight">Leads no Funil</h1>
+          <p className="text-sm text-zinc-400 mt-1">Gerencie os perfis mapeados, qualificados e abordados no Instagram</p>
         </div>
         <div className="flex items-center gap-3">
-          <Link href="?type=client" className={`px-4 py-2 rounded-md font-medium text-sm transition ${type === 'client' ? 'bg-primary text-white shadow-sm' : 'bg-white border text-gray-700 hover:bg-gray-50'}`}>Clientes</Link>
-          <Link href="?type=affiliate" className={`px-4 py-2 rounded-md font-medium text-sm transition ${type === 'affiliate' ? 'bg-primary text-white shadow-sm' : 'bg-white border text-gray-700 hover:bg-gray-50'}`}>Afiliados</Link>
+          <div className="flex items-center bg-[#121214] p-1 rounded-lg border border-white/[0.08]">
+            <Link 
+              href="?type=client" 
+              className={`px-3 py-1.5 rounded-md font-medium text-xs transition-all ${
+                type === 'client' 
+                  ? 'bg-[#ea580c] text-white shadow-[0_0_12px_rgba(234,88,12,0.35)]' 
+                  : 'text-zinc-400 hover:text-white'
+              }`}
+            >
+              Clientes
+            </Link>
+            <Link 
+              href="?type=affiliate" 
+              className={`px-3 py-1.5 rounded-md font-medium text-xs transition-all ${
+                type === 'affiliate' 
+                  ? 'bg-[#ea580c] text-white shadow-[0_0_12px_rgba(234,88,12,0.35)]' 
+                  : 'text-zinc-400 hover:text-white'
+              }`}
+            >
+              Afiliados
+            </Link>
+          </div>
           <DiscoverButton />
         </div>
       </div>
@@ -37,15 +57,25 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
           return (
             <KanbanColumn key={status} label={PIPELINE_STATUS_LABELS[status] || status} count={colLeads.length}>
               {colLeads.map((lead: any) => (
-                <Link href={`/leads/${lead.id}`} key={lead.id} className="block bg-white p-4 rounded-lg shadow-sm border border-gray-100 hover:border-primary transition cursor-pointer mb-3">
-                  <div className="font-medium text-gray-900 truncate">@{lead.instagram_handle}</div>
-                  <div className="text-sm text-gray-500 truncate">{lead.name || 'Sem nome'}</div>
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    <span className={`text-xs px-2 py-1 rounded-full font-medium ${
-                      (lead.icp_score as number) < 30 ? 'bg-red-100 text-red-700' :
-                      (lead.icp_score as number) < 60 ? 'bg-yellow-100 text-yellow-700' :
-                      'bg-green-100 text-green-700'
-                    }`}>Score: {lead.icp_score}</span>
+                <Link 
+                  href={`/leads/${lead.id}`} 
+                  key={lead.id} 
+                  className="block bg-[#18181B] p-4 rounded-xl border border-white/[0.08] hover:border-[#ea580c]/50 hover:shadow-[0_0_20px_rgba(234,88,12,0.12)] transition-all cursor-pointer mb-3 group"
+                >
+                  <div className="font-semibold text-white group-hover:text-[#f97316] transition-colors truncate text-sm">
+                    @{lead.instagram_handle}
+                  </div>
+                  <div className="text-xs text-zinc-400 truncate mt-0.5">
+                    {lead.name || 'Sem nome registrado'}
+                  </div>
+                  <div className="mt-3 flex flex-wrap items-center gap-2">
+                    <span className={`text-[11px] px-2 py-0.5 rounded-full font-medium border ${
+                      (lead.icp_score as number) < 30 ? 'bg-red-500/10 text-red-400 border-red-500/20' :
+                      (lead.icp_score as number) < 60 ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' :
+                      'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                    }`}>
+                      Score: {lead.icp_score}
+                    </span>
                     <StatusBadge status={lead.channel_status as string} type="channel" />
                   </div>
                 </Link>

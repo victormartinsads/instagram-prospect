@@ -17,16 +17,16 @@ export default function DiscoverButton() {
     <button
       onClick={handleStartDiscovery}
       disabled={isPending}
-      className={`flex items-center gap-2 px-4 py-2 rounded-md font-medium text-white shadow-sm transition ${
+      className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-sm text-white shadow-sm transition-all ${
         isPending
-          ? 'bg-indigo-400 cursor-not-allowed'
-          : 'bg-primary hover:bg-primary-dark cursor-pointer'
+          ? 'bg-zinc-800 text-zinc-500 border border-white/[0.08] cursor-not-allowed'
+          : 'bg-[#ea580c] hover:bg-[#f97316] text-white shadow-[0_0_20px_rgba(234,88,12,0.35)] border border-orange-500/30 cursor-pointer active:scale-95'
       }`}
     >
       {isPending ? (
         <>
-          <RefreshCw className="w-4 h-4 animate-spin" />
-          <span>Iniciando ciclo...</span>
+          <RefreshCw className="w-4 h-4 animate-spin text-orange-400" />
+          <span>Buscando leads...</span>
         </>
       ) : (
         <>

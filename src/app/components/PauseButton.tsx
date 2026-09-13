@@ -1,6 +1,5 @@
 'use client';
 import { useState } from 'react';
-import { togglePauseAction } from '@/features/system/actions'; // assumido ou inline no server action
 
 export default function PauseButton({ initialPaused }: { initialPaused: boolean }) {
   const [isPaused, setIsPaused] = useState(initialPaused);
@@ -9,8 +8,6 @@ export default function PauseButton({ initialPaused }: { initialPaused: boolean 
   const handleToggle = async () => {
     if (confirm(isPaused ? "Deseja retomar o sistema?" : "Deseja pausar o sistema?")) {
       setLoading(true);
-      // Aqui simularia a chamada
-      // await togglePauseAction(!isPaused);
       setIsPaused(!isPaused);
       setLoading(false);
     }
@@ -20,9 +17,11 @@ export default function PauseButton({ initialPaused }: { initialPaused: boolean 
     <button 
       onClick={handleToggle}
       disabled={loading}
-      className={`px-4 py-2 rounded-md font-medium text-white transition ${
-        isPaused ? 'bg-success hover:bg-green-600' : 'bg-danger hover:bg-red-600'
-      } ${loading ? 'opacity-50' : ''}`}
+      className={`px-4 py-2 rounded-lg font-medium text-sm transition-all shadow-sm ${
+        isPaused 
+          ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-[0_0_15px_rgba(16,185,129,0.3)] border border-emerald-400/30' 
+          : 'bg-[#18181B] hover:bg-red-950/40 text-red-400 border border-red-500/30 hover:border-red-500/60'
+      } ${loading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
     >
       {loading ? 'Processando...' : isPaused ? 'Retomar Sistema' : 'Pausar Sistema'}
     </button>
