@@ -18,7 +18,7 @@ export default async function DashboardPage() {
     querySql('SELECT COUNT(*) as count FROM leads'),
     querySql('SELECT COUNT(*) as count FROM leads WHERE icp_score >= 60'),
     querySql("SELECT COUNT(*) as count FROM conversations WHERE status = 'active'"),
-    querySql("SELECT (SUM(CASE WHEN pipeline_status = 'replied' THEN 1 ELSE 0 END) * 100.0 / NULLIF(SUM(CASE WHEN pipeline_status = 'contacted' OR pipeline_status = 'replied' THEN 1 ELSE 0 END), 0)) as rate FROM leads"),
+    querySql("SELECT (SUM(CASE WHEN pipeline_status IN ('replied', 'interested', 'whatsapp_handoff', 'registered', 'active_customer') THEN 1 ELSE 0 END) * 100.0 / NULLIF(SUM(CASE WHEN pipeline_status NOT IN ('discovered', 'qualified') THEN 1 ELSE 0 END), 0)) as rate FROM leads"),
     querySql("SELECT COUNT(*) as count FROM leads WHERE pipeline_status = 'whatsapp_handoff'"),
     querySql("SELECT SUM(estimated_cost_usd) as total FROM ai_calls WHERE strftime('%Y-%m', created_at) = strftime('%Y-%m', 'now')"),
     querySql("SELECT value FROM system_state WHERE key = 'is_paused'"),
